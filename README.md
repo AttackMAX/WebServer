@@ -2,7 +2,7 @@
  * @Author: AttackMAX 2646479700@qq.com
  * @Date: 2024-12-04 01:05:03
  * @LastEditors: AttackMAX 2646479700@qq.com
- * @LastEditTime: 2024-12-04 14:19:53
+ * @LastEditTime: 2024-12-05 22:39:47
  * 
  * Copyright (c) 2024 by ※ AttackMAX ※, All Rights Reserved. 
 -->
@@ -15,3 +15,8 @@
 ### 截止 2024/12/4
 
 > 设置了基本的错误处理，完成了服务器和客户端信息传输
+
+### 截止 2024/12/5
+> 通过epoll实现了高并发。
+> 引入OOP思想，初步封装了Scocket,netAddress和Epoll，隐藏了底层语言实现的细节。
+
