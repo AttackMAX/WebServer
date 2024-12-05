@@ -2,7 +2,7 @@
  * @Author: AttackMAX 2646479700@qq.com
  * @Date: 2024-12-04 01:05:03
  * @LastEditors: AttackMAX 2646479700@qq.com
- * @LastEditTime: 2024-12-05 22:19:35
+ * @LastEditTime: 2024-12-06 01:10:20
  *
  * Copyright (c) 2024 by ※ AttackMAX ※, All Rights Reserved.
  */
@@ -19,6 +19,7 @@
 #include "Socket.h"
 #include "InetAddress.h"
 #include "Epoll.h"
+#include "Channel.h"
 
 // #define MAX_EVENTS 1024
 #define READ_BUFFER 1024
@@ -40,15 +41,16 @@ int main()
 
     Epoll *ep = new Epoll();
     serve_sock->setnonblocking();
-    ep->addFd(serve_sock->getfd(), EPOLLIN | EPOLLET);
+    Channel *serveChannel = new Channel(ep, serve_sock->getfd());
+    serveChannel->enableReading();
 
     while (1)
     {
-        std::vector<epoll_event> evs = ep->poll();
-        int epoll_siz = evs.size();
+        std::vector<Channel *> activeChannels = ep->poll();
+        int epoll_siz = activeChannels.size();
         for (int i = 0; i < epoll_siz; i++)
         {
-            if (evs[i].data.fd == serve_sock->getfd())
+            if (activeChannels[i]->getFd() == serve_sock->getfd())
             {
                 InetAddress *client_addr = new InetAddress();
                 Socket *client_sock = new Socket(serve_sock->accept(client_addr));
@@ -56,11 +58,12 @@ int main()
                        inet_ntoa(client_addr->addr.sin_addr),
                        ntohs(client_addr->addr.sin_port));
                 client_sock->setnonblocking();
-                ep->addFd(client_sock->getfd(), EPOLLIN | EPOLLET);
+                Channel *clientChannel = new Channel(ep, client_sock->getfd());
+                clientChannel->enableReading();
             }
-            else if (evs[i].events & EPOLLIN)
+            else if (activeChannels[i]->getRevents() & EPOLLIN)
             { // 可读事件
-                handleReadEvent(evs[i].data.fd);
+                handleReadEvent(activeChannels[i]->getFd());
             }
             else
             {
