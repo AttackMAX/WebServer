@@ -2,7 +2,7 @@
  * @Author: AttackMAX 2646479700@qq.com
  * @Date: 2024-12-03 12:02:23
  * @LastEditors: AttackMAX 2646479700@qq.com
- * @LastEditTime: 2024-12-04 14:15:59
+ * @LastEditTime: 2024-12-05 20:28:40
  *
  * Copyright (c) 2024 by ※ AttackMAX ※, All Rights Reserved.
  */
@@ -13,6 +13,8 @@
 #include <string.h>
 #include <unistd.h>
 #include "util.h"
+
+#define BUFFER_SIZE 1024
 
 int main()
 {
@@ -32,7 +34,7 @@ int main()
 
     while (1)
     {
-        char buf[1024];
+        char buf[BUFFER_SIZE];
         bzero(buf, sizeof(buf));
         scanf("%s", buf);
         ssize_t write_bytes = write(sockfd, buf, sizeof(buf));
