@@ -2,7 +2,7 @@
  * @Author: AttackMAX 2646479700@qq.com
  * @Date: 2024-12-04 13:47:50
  * @LastEditors: AttackMAX 2646479700@qq.com
- * @LastEditTime: 2024-12-04 13:50:29
+ * @LastEditTime: 2024-12-06 14:53:34
  *
  * Copyright (c) 2024 by ※ AttackMAX ※, All Rights Reserved.
  */
@@ -10,9 +10,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void errif(bool status, const char *errmsg)
+void errif(bool condition, const char *errmsg)
 {
-    if (status)
+    if (condition)
     {
         perror(errmsg);
         exit(EXIT_FAILURE);

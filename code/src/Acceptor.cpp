@@ -1,32 +1,45 @@
+/*
+ * @Author: AttackMAX 2646479700@qq.com
+ * @Date: 2024-12-06 12:41:25
+ * @LastEditors: AttackMAX 2646479700@qq.com
+ * @LastEditTime: 2024-12-06 14:54:53
+ *
+ * Copyright (c) 2024 by ※ AttackMAX ※, All Rights Reserved.
+ */
 #include "Acceptor.h"
 #include "Socket.h"
 #include "InetAddress.h"
 #include "Channel.h"
-#include "Server.h"
+#include <stdio.h>
 
-Acceptor::Acceptor(EventLoop *_loop) : loop(_loop)
+Acceptor::Acceptor(EventLoop *_loop) : loop(_loop), sock(nullptr), acceptChannel(nullptr)
 {
     sock = new Socket();
-    addr = new InetAddress("127.0.0.1", 8888);
+    InetAddress *addr = new InetAddress("127.0.0.1", 1234);
     sock->bind(addr);
     sock->listen();
     sock->setnonblocking();
-    acceptChannel = new Channel(loop, sock->getfd());
+    acceptChannel = new Channel(loop, sock->getFd());
     std::function<void()> cb = std::bind(&Acceptor::acceptConnection, this);
     acceptChannel->setCallback(cb);
     acceptChannel->enableReading();
+    delete addr;
 }
 
 Acceptor::~Acceptor()
 {
     delete sock;
-    delete addr;
     delete acceptChannel;
 }
 
 void Acceptor::acceptConnection()
 {
-    newConnectionCallback(sock);
+    InetAddress *clnt_addr = new InetAddress();
+    Socket *clnt_sock = new Socket(sock->accept(clnt_addr));
+    printf("new client fd %d! IP: %s Port: %d\n", clnt_sock->getFd(), inet_ntoa(clnt_addr->getAddr().sin_addr), ntohs(clnt_addr->getAddr().sin_port));
+    clnt_sock->setnonblocking();
+    newConnectionCallback(clnt_sock);
+    delete clnt_addr;
 }
 
 void Acceptor::setNewConnectionCallback(std::function<void(Socket *)> _cb)

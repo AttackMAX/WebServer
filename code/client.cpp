@@ -1,13 +1,12 @@
 /*
  * @Author: AttackMAX 2646479700@qq.com
- * @Date: 2024-12-03 12:02:23
+ * @Date: 2024-12-04 01:05:03
  * @LastEditors: AttackMAX 2646479700@qq.com
- * @LastEditTime: 2024-12-06 12:05:29
+ * @LastEditTime: 2024-12-06 14:53:53
  *
  * Copyright (c) 2024 by ※ AttackMAX ※, All Rights Reserved.
  */
-
-#include <stdio.h>
+#include <iostream>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <string.h>
@@ -18,41 +17,37 @@
 
 int main()
 {
-    // 创建套接字
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
     errif(sockfd == -1, "socket create error");
 
-    // 定义服务器地址结构
-    struct sockaddr_in serve_addr;
-    bzero(&serve_addr, sizeof(serve_addr));              // 将服务器地址结构清零
-    serve_addr.sin_family = AF_INET;                     // 设置地址族为IPv4
-    serve_addr.sin_addr.s_addr = inet_addr("127.0.0.1"); // 设置IP地址为127.0.0.1
-    serve_addr.sin_port = htons(8888);                   // 设置端口号为8888，使用网络字节序
+    struct sockaddr_in serv_addr;
+    bzero(&serv_addr, sizeof(serv_addr));
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    serv_addr.sin_port = htons(1234);
 
-    // 连接到服务器
-    errif(connect(sockfd, (sockaddr *)&serve_addr, sizeof(serve_addr)) == -1, "socket connect error");
+    errif(connect(sockfd, (sockaddr *)&serv_addr, sizeof(serv_addr)) == -1, "socket connect error");
 
-    while (1)
+    while (true)
     {
-        char buf[BUFFER_SIZE];
-        bzero(buf, sizeof(buf));
+        char buf[BUFFER_SIZE]; // 在这个版本，buf大小必须大于或等于服务器端buf大小，不然会出错，想想为什么？
+        bzero(&buf, sizeof(buf));
         scanf("%s", buf);
         ssize_t write_bytes = write(sockfd, buf, sizeof(buf));
         if (write_bytes == -1)
         {
-            printf("socket alredy disconnected,can't write any more!\n");
+            printf("socket already disconnected, can't write any more!\n");
             break;
         }
-        bzero(buf, sizeof(buf));
+        bzero(&buf, sizeof(buf));
         ssize_t read_bytes = read(sockfd, buf, sizeof(buf));
         if (read_bytes > 0)
         {
-            printf("message from client fd %d: %s\n", sockfd, buf);
+            printf("message from server: %s\n", buf);
         }
         else if (read_bytes == 0)
         {
-            printf("server fd %d disconneted\n", sockfd);
-            close(sockfd);
+            printf("server socket disconnected!\n");
             break;
         }
         else if (read_bytes == -1)
@@ -62,6 +57,5 @@ int main()
         }
     }
     close(sockfd);
-
     return 0;
 }

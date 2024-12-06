@@ -2,7 +2,7 @@
  * @Author: AttackMAX 2646479700@qq.com
  * @Date: 2024-12-04 01:05:03
  * @LastEditors: AttackMAX 2646479700@qq.com
- * @LastEditTime: 2024-12-06 13:04:20
+ * @LastEditTime: 2024-12-06 14:56:45
  * 
  * Copyright (c) 2024 by ※ AttackMAX ※, All Rights Reserved. 
 -->
@@ -25,3 +25,5 @@
 > 初步将服务器改造成Reactor模式
 
 > 分离接受连接这一模块，添加一个Acceptor类
+
+> 将tcp连接封装成类Connetction 

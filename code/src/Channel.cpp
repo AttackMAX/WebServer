@@ -2,26 +2,36 @@
  * @Author: AttackMAX 2646479700@qq.com
  * @Date: 2024-12-06 00:35:36
  * @LastEditors: AttackMAX 2646479700@qq.com
- * @LastEditTime: 2024-12-06 12:08:32
+ * @LastEditTime: 2024-12-06 14:51:26
  *
  * Copyright (c) 2024 by ※ AttackMAX ※, All Rights Reserved.
  */
 #include "Channel.h"
 #include "EventLoop.h"
+#include <unistd.h>
 
-Channel::Channel(EventLoop *_loop, int _fd) : loop(_loop), fd(_fd), events(0), revents(0), inEpoll(false) {}
-
-Channel::~Channel() {}
-
-void Channel::enableReading()
+Channel::Channel(EventLoop *_loop, int _fd) : loop(_loop), fd(_fd), events(0), revents(0), inEpoll(false)
 {
-    events = EPOLLIN | EPOLLET;
-    loop->updateChannel(this);
+}
+
+Channel::~Channel()
+{
+    if (fd != -1)
+    {
+        close(fd);
+        fd = -1;
+    }
 }
 
 void Channel::handleEvent()
 {
     callback();
+}
+
+void Channel::enableReading()
+{
+    events |= EPOLLIN | EPOLLET;
+    loop->updateChannel(this);
 }
 
 int Channel::getFd()
@@ -47,6 +57,10 @@ void Channel::setInEpoll()
 {
     inEpoll = true;
 }
+
+// void Channel::setEvents(uint32_t _ev){
+//     events = _ev;
+// }
 
 void Channel::setRevents(uint32_t _ev)
 {
