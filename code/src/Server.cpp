@@ -2,7 +2,7 @@
  * @Author: AttackMAX 2646479700@qq.com
  * @Date: 2024-12-06 11:47:42
  * @LastEditors: AttackMAX 2646479700@qq.com
- * @LastEditTime: 2024-12-06 12:19:23
+ * @LastEditTime: 2024-12-06 13:00:06
  *
  * Copyright (c) 2024 by ※ AttackMAX ※, All Rights Reserved.
  */
@@ -10,6 +10,7 @@
 #include "Socket.h"
 #include "InetAddress.h"
 #include "Channel.h"
+#include "Acceptor.h"
 #include <functional>
 #include <string.h>
 #include <unistd.h>
@@ -18,22 +19,16 @@
 
 #define READ_BUFFER 1024
 
-Server::Server(EventLoop *_loop) : loop(_loop)
+Server::Server(EventLoop *_loop) : loop(_loop), acceptor(nullptr)
 {
-    Socket *serv_sock = new Socket();
-    InetAddress *serv_addr = new InetAddress("127.0.0.1", 8888);
-    serv_sock->bind(serv_addr);
-    serv_sock->listen();
-    serv_sock->setnonblocking();
-
-    Channel *servChannel = new Channel(loop, serv_sock->getfd());
-    std::function<void()> cb = std::bind(&Server::newConnection, this, serv_sock);
-    servChannel->setCallback(cb);
-    servChannel->enableReading();
+    acceptor = new Acceptor(loop);
+    std::function<void(Socket *)> cb = std::bind(&Server::newConnection, this, std::placeholders::_1);
+    acceptor->setNewConnectionCallback(cb);
 }
 
 Server::~Server()
 {
+    delete acceptor;
 }
 
 void Server::handleReadEvent(int sockfd)
@@ -45,7 +40,6 @@ void Server::handleReadEvent(int sockfd)
         ssize_t bytes_read = read(sockfd, buf, sizeof(buf));
         if (bytes_read > 0)
         {
-            // buf[bytes_read] = '\0';
             printf("message from client fd %d: %s\n", sockfd, buf);
             write(sockfd, buf, sizeof(buf));
         }
